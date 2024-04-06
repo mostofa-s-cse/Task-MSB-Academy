@@ -10,10 +10,10 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       usersQuery: {
-        type: Sequelize.STRING
+        type: Sequelize.TEXT
       },
       openaiResponse: {
-        type: Sequelize.STRING
+        type: Sequelize.TEXT
       },
       createdAt: {
         allowNull: false,
