@@ -7,11 +7,11 @@ const DashboardPage: React.FC = () => {
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-white p-4 rounded shadow-md">
           <h2 className="text-xl font-semibold mb-2">Analytics</h2>
-          <p>Put your analytics here...</p>
+          <p>...</p>
         </div>
         <div className="bg-white p-4 rounded shadow-md">
           <h2 className="text-xl font-semibold mb-2">Tasks</h2>
-          <p>Put your tasks here...</p>
+          <p>...</p>
         </div>
       </div>
     </div>

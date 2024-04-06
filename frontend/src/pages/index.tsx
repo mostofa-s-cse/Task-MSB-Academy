@@ -3,21 +3,33 @@ import React, { useState } from 'react';
 const HomePage: React.FC = () => {
   const [userQuery, setUserQuery] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const [response, setResponse] = useState<string>('');
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setLoading(true);
-    // Simulating a loading delay of 2 seconds
-    setTimeout(() => {
+    try {
+      const response = await fetch('http://localhost:5000/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ usersQuery: userQuery }),
+      });
+      const data = await response.json();
+      // console.log(data.content);
+      setResponse(data.content);
+    } catch (error) {
+      console.error('Error:', error);
+      // Handle error if needed
+    } finally {
       setLoading(false);
-      console.log("Query submitted:", userQuery);
-      // Handle the user's query here
-    }, 2000);
+    }
   };
 
   return (
     <>
     <nav className="flex items-center justify-between flex-wrap bg-teal-500 p-6">
-  <div className="flex items-center flex-shrink-0 text-white mr-6">
+    <div className="flex items-center flex-shrink-0 text-white mr-6">
     <span className="font-semibold text-xl tracking-tight">ChatGPT</span>
   </div>
   <div className="block lg:hidden">
@@ -33,36 +45,39 @@ const HomePage: React.FC = () => {
     <a href="/dashboard" className="inline-block text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-teal-500 hover:bg-white mt-4 lg:mt-0">All Chat History</a>
     </div>
   </div>
-</nav>
+    </nav>
 
-    <div className="flex flex-col justify-center items-center">
-    
-  <div className="">
-  <h1 className='mb-2'>Openai Response</h1>
-    {loading && <p className="mt-4">Loading...</p>}
-  </div>
-  <div className="textbox fixed bottom-0 mb-5">
-    <div className="mb-4 w-80">
-      <textarea
-        rows={3}
-        value={userQuery}
-        onChange={(e) => setUserQuery(e.target.value)}
-        className="w-full p-2 border border-gray-300 rounded"
-        placeholder="Enter your query..."
-      />
+    <div className="mt-4 flex flex-col justify-center items-center">
+    <div className="p-8 max-w-lg rounded overflow-hidden shadow-lg">
+        {loading && <p className="mt-4">Loading...</p>}
+        {!loading && response && (
+          <div className='mt-4'>
+            <h1 className='mb-2 text-lg text-center font-bold text-green-700 underline'>OpenAI Response</h1>
+            <p>{response}</p>
+          </div>
+        )}
+      </div>
+      <div className="textbox fixed bottom-0 mb-5">
+        <div className="mb-4 w-80">
+          <textarea
+            rows={3}
+            value={userQuery}
+            onChange={(e) => setUserQuery(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded"
+            placeholder="Enter your query..."
+          />
+        </div>
+        <button
+          onClick={handleSubmit}
+          disabled={!userQuery || loading}
+          className="bg-teal-500 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
+        >
+          {loading ? 'Loading...' : 'Submit'}
+        </button>
+      </div>
     </div>
-    <button
-      onClick={handleSubmit}
-      disabled={!userQuery || loading}
-      className="bg-teal-500 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
-    >
-      {loading ? 'Loading...' : 'Submit'}
-    </button>
-  </div>
-</div>
-</>
+  </>
   );
 };
 
 export default HomePage;
-
