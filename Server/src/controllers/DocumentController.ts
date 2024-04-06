@@ -5,7 +5,7 @@ import axios from "axios";
 
 const generateResponse = async (req: Request, res: Response): Promise<Response> => {
     try {
-        // Extract the 'search' parameter from the request
+        // Extract the 'usersQuery' parameter from the request
         const { usersQuery } = req.body;
 
         // Make a request to OpenAI API
@@ -22,7 +22,7 @@ const generateResponse = async (req: Request, res: Response): Promise<Response> 
             top_p: 1.0,
             frequency_penalty: 0.52,
             presence_penalty: 0.5,
-            stop: ["1000."]
+            stop: ["10."]
         }, {
             headers: {
                 'Content-Type': 'application/json',
@@ -32,7 +32,6 @@ const generateResponse = async (req: Request, res: Response): Promise<Response> 
 
         // Extract the response data from the API response
         const data = response.data.choices[0].message;
-
         // Create a record of the chat response
         await Document.create({
             openaiResponse: data.content,
@@ -40,7 +39,7 @@ const generateResponse = async (req: Request, res: Response): Promise<Response> 
         });
 
         // Return the response to the client
-        return res.status(200).json(data);
+        return res.status(200).json({data,usersQuery:usersQuery});
     } catch (error: any) {
         // Handle exceptions (e.g., log the error)
         return res.status(500).json({ error: error.message });
@@ -52,12 +51,20 @@ const getAllHistory = async (req: Request, res: Response): Promise<Response> => 
         const { page } = req.query;
         const skip = (parseInt(page as string) || 1) - 1; // Parse page to integer, default to 1
         const take = 5;
-        const chat = await Document.findAll({ offset: skip * take, limit: take });
+        const totalChatCount = await Document.count(); // Get total count of documents
+        const totalPages = Math.ceil(totalChatCount / take); // Calculate total pages
+
+        const chat = await Document.findAll({
+            order: [['id', 'DESC']], // Order by id column in descending order
+            offset: skip * take,
+            limit: take
+          });
 
         return res.status(200).json({
             success: true,
             message: 'Successfully get data',
-            data: chat
+            data: chat,
+            totalPages:totalPages
         });
     } catch (error: any) {
         return res.status(500).json({

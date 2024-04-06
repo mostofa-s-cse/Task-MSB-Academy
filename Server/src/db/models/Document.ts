@@ -26,11 +26,11 @@ Document.init({
 		allowNull: false
 	},
 	usersQuery: {
-		type: DataTypes.STRING,
+		type: DataTypes.TEXT,
 		allowNull: true
 	},
 	openaiResponse: {
-		type: DataTypes.STRING,
+		type: DataTypes.TEXT,
 		allowNull: true
 	},
 }, {
