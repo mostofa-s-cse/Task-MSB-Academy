@@ -6,7 +6,7 @@ import axios from "axios";
 const generateResponse = async (req: Request, res: Response): Promise<Response> => {
     try {
         // Extract the 'search' parameter from the request
-        const { search } = req.body;
+        const { usersQuery } = req.body;
 
         // Make a request to OpenAI API
         const response = await axios.post("https://api.openai.com/v1/chat/completions", {
@@ -14,7 +14,7 @@ const generateResponse = async (req: Request, res: Response): Promise<Response> 
             messages: [
                 {
                     role: "user",
-                    content: search
+                    content: usersQuery
                 }
             ],
             temperature: 0.5,
@@ -22,7 +22,7 @@ const generateResponse = async (req: Request, res: Response): Promise<Response> 
             top_p: 1.0,
             frequency_penalty: 0.52,
             presence_penalty: 0.5,
-            stop: ["100."]
+            stop: ["1000."]
         }, {
             headers: {
                 'Content-Type': 'application/json',
@@ -36,7 +36,7 @@ const generateResponse = async (req: Request, res: Response): Promise<Response> 
         // Create a record of the chat response
         await Document.create({
             openaiResponse: data.content,
-            usersQuery: search
+            usersQuery: usersQuery
         });
 
         // Return the response to the client
@@ -48,15 +48,16 @@ const generateResponse = async (req: Request, res: Response): Promise<Response> 
 };
 
 const getAllHistory = async (req: Request, res: Response): Promise<Response> => {
-	response:"test"
-    try {
-        const data = await Document.findAll({
-            order: [['id', 'DESC']]
-        });
+	try {
+        const { page } = req.query;
+        const skip = (parseInt(page as string) || 1) - 1; // Parse page to integer, default to 1
+        const take = 5;
+        const chat = await Document.findAll({ offset: skip * take, limit: take });
+
         return res.status(200).json({
             success: true,
             message: 'Successfully get data',
-            data: data
+            data: chat
         });
     } catch (error: any) {
         return res.status(500).json({
